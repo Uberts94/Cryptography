@@ -1,0 +1,2 @@
+ciao mi chiamo Pietro ed il contenuto di questo file sarà
+cifrato con AES128_cbc

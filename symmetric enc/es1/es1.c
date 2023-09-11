@@ -49,6 +49,18 @@ int main(int argc, char **argv) {
     RAND_priv_bytes(key, BYTE_SIZE);
     RAND_bytes(iv, BYTE_SIZE);
 
+    printf("Key:    ", key);
+    for(int i = 0 ; i < BYTE_SIZE; i++) {
+        printf("%2x", key[i]);
+    }
+    printf("\n");
+
+    printf("IV:     ", iv);
+    for(int i = 0 ; i < BYTE_SIZE; i++) {
+        printf("%2x", iv[i]);
+    }
+    printf("\n");
+
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
 
     //Setting the context. The cipher is passed to the ctx by means of EVP_get_cipherbyname("ciphername").
@@ -84,7 +96,6 @@ int main(int argc, char **argv) {
     EVP_CIPHER_CTX_free(ctx);
 
     /* TO CHECK THE CORRECTNESS, UNCOMMENT THE CODE BELOW TO DECRYPT THE CIPHERTEXT FILE*/
-
     /*
     rewind(output);
 
@@ -124,6 +135,7 @@ int main(int argc, char **argv) {
     EVP_CIPHER_CTX_free(ctx1);
     fclose(dec);
     */
+
     fclose(input);
     fclose(output);
     

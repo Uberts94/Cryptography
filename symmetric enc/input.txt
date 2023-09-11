@@ -1,2 +1,4 @@
-ciao mi chiamo Pietro ed il contenuto di questo file sarà
-cifrato con AES128_cbc
+Ciao mi chiamo Pietro ed il contenuto di questo file sarà
+cifrato con AES128_cbc. Devo scrivere all'interno del file almeno 1024 bytes
+all'interno di questo file, altrimenti la fread, se dovessero essere meno
+di MAX_BUFFER chars, leggerà bytes randomici salvati nello heap. 

@@ -7,6 +7,9 @@
 #define ENCRYPT 1
 #define DECRYPT 0
 
+#define MODULUS_SIZE 3072
+#define EXP_SIZE 256
+
 void handle_errors() {
     ERR_print_errors_fp(stderr);
     abort();
@@ -33,10 +36,8 @@ int main(int argc, char **argv) {
     BN_CTX *ctx = BN_CTX_new();
 
     //Generating a prime number p
-    BN_rand(p, 3072, 0, 1);
-    
     while(BN_check_prime(p, ctx, NULL) != 1) {
-        BN_rand(p, 3072, 0, 1);
+        BN_rand(p, MODULUS_SIZE, 0, 1);
     }
 
     if(!BN_check_prime(p, ctx, NULL)) {
@@ -49,8 +50,8 @@ int main(int argc, char **argv) {
     }
 
     //Generating Alice and Bob secret choices
-    if(!BN_rand(alice_choice, 256, -1, 0)) handle_errors();
-    if(!BN_rand(bob_choice, 256, -1, 0)) handle_errors();
+    if(!BN_rand(alice_choice, EXP_SIZE, -1, 0)) handle_errors();
+    if(!BN_rand(bob_choice, EXP_SIZE, -1, 0)) handle_errors();
 
     printf("Alice secret choice:   ");
     BN_print_fp(stdout, alice_choice);

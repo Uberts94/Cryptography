@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
         exit(1);
     } 
 
-    unsigned char key[SIZE], iv[SIZE/2], ciphertext[MAXSIZE], buffer[MAXSIZE];
+    unsigned char key[SIZE], iv[SIZE/2], ciphertext[MAXSIZE], masked[MAXSIZE], buffer[MAXSIZE];
     int nbytes_read, lenght;
 
     //Generating the key
@@ -70,8 +70,12 @@ int main(int argc, char **argv) {
 
         //Encryption
         if(!EVP_EncryptUpdate(ctx, ciphertext, &lenght, buffer, nbytes_read)) handle_errors();
+
+        for(int i = 0; i < lenght; i++) {
+            sprintf(&masked[i*2], "%02x", ciphertext[i]^1);
+        }        
         
-        fwrite(ciphertext, sizeof(unsigned char), lenght, output);
+        fwrite(masked, sizeof(unsigned char), lenght, output);
                
         if(ferror(output)) {
             fprintf(stderr, "Error writing output file %s.\n");
@@ -81,6 +85,10 @@ int main(int argc, char **argv) {
     
     //Last bytes
     if(!EVP_EncryptFinal(ctx, ciphertext, &lenght)) handle_errors();
+
+    for(int i = 0; i < lenght; i++) {
+            sprintf(&masked[i*2], "%02x", ciphertext[i]^1);
+    }  
 
     fwrite(ciphertext, sizeof(unsigned char), lenght, output);
 
@@ -93,7 +101,7 @@ int main(int argc, char **argv) {
 
     /* TO CHECK THE CORRECTNESS, UNCOMMENT THE CODE BELOW TO DECRYPT THE CIPHERTEXT FILE*/
 
-    /*
+    
     //Initilizing the context
     EVP_CIPHER_CTX *ctx1 = EVP_CIPHER_CTX_new();
     if(!EVP_DecryptInit(ctx1, EVP_chacha20(), key, iv)) handle_errors();
@@ -109,16 +117,26 @@ int main(int argc, char **argv) {
             abort();
         }
 
-        if(!EVP_DecryptUpdate(ctx1, decrypted, &lenght, buffer, nbytes_read)) handle_errors();
+        for(int i = 0; i < nbytes_read; i++) {
+            sprintf(&masked[i*2], "%02x", buffer[i]^1);
+        } 
+
+        if(!EVP_DecryptUpdate(ctx1, decrypted, &lenght, masked, nbytes_read)) handle_errors(); 
                
         for(int i = 0; i < lenght; i++)
             printf("%c", decrypted[i]);
     }
 
+    for(int i = 0; i < nbytes_read; i++) {
+            sprintf(&masked[i*2], "%02x", buffer[i]^1);
+    } 
+
     if(!EVP_DecryptFinal(ctx1, decrypted, &lenght)) handle_errors();
+    for(int i = 0; i < lenght; i++)
+        printf("%c", decrypted[i]);
 
     EVP_CIPHER_CTX_free(ctx1);
-    */
+    
     
     fclose(input);
     fclose(output);

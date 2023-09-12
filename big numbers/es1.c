@@ -38,13 +38,13 @@ int main(int argc, char **argv) {
 
     printf("Generated big numbers:\n");
     printf("bn1:    ");
-    BN_print_fp(stdout, bn1);
+    if(!BN_print_fp(stdout, bn1) == 1) handle_errors();
     printf("\n");
     printf("bn2:    ");
-    BN_print_fp(stdout, bn2);
+    if(!BN_print_fp(stdout, bn2) == 1) handle_errors();
     printf("\n");
     printf("bn3:    ");
-    BN_print_fp(stdout, bn3);
+    if(!BN_print_fp(stdout, bn3) == 1) handle_errors();
     printf("\n\n\n");
 
     //Defining context, used for intermediate operations
@@ -54,40 +54,40 @@ int main(int argc, char **argv) {
     printf("Computing operations:\n\n");
 
     //1) sum(bn1+bn2)
-    BN_add(result, bn1, bn2);
+    if(!BN_add(result, bn1, bn2) == 1) handle_errors();
     printf("sum(bn1+bn2) : ");
-    BN_print_fp(stdout, result);
+    if(!BN_print_fp(stdout, result) == 1) handle_errors();
     printf("\n\n");
 
     //2) difference(bn1-bn3)
     printf("difference(bn1-bn3) :");
-    BN_sub(result, bn1, bn3);
-    BN_print_fp(stdout, result);
+    if(!BN_sub(result, bn1, bn3) == 1) handle_errors();
+    if(!BN_print_fp(stdout, result) == 1) handle_errors();
     printf("\n\n");
 
     //3) multiplication(bn1*bn2*bn3)
     printf("multiplication(bn1*bn2*bn3) :");
-    BN_mul(temp, bn1, bn2, ctx);
-    BN_mul(result, temp, bn3, ctx);
-    BN_print_fp(stdout, result);
+    if(!BN_mul(temp, bn1, bn2, ctx) == 1) handle_errors();
+    if(!BN_mul(result, temp, bn3, ctx) == 1) handle_errors();
+    if(!BN_print_fp(stdout, result) == 1) handle_errors();
     printf("\n\n");
 
     //4) integer division(bn3/bn1)
     printf("integer division(bn3/bn1) :");
-    BN_div(result, temp, bn3, bn1, ctx);
-    BN_print_fp(stdout, result);
+    if(!BN_div(result, temp, bn3, bn1, ctx) == 1) handle_errors();
+    if(!BN_print_fp(stdout, result) == 1) handle_errors();
     printf("\n\n");
 
     //5) modulus(bn1 mod bn2)
     printf("modulus(bn1 mod bn2) :");
-    BN_mod(result, bn1, bn2, ctx);
-    BN_print_fp(stdout, result);
+    if(!BN_mod(result, bn1, bn2, ctx) == 1) handle_errors();
+    if(!BN_print_fp(stdout, result) == 1) handle_errors();
     printf("\n\n");
 
     //6) modulus exponentiation (bn1^bn3 mod bn2)
     printf("modulus exponentiation (bn1^bn3 mod bn2) :");
-    BN_mod_exp(result, bn1, bn3, bn2, ctx);
-    BN_print_fp(stdout, result);
+    if(!BN_mod_exp(result, bn1, bn3, bn2, ctx) == 1) handle_errors();
+    if(!BN_print_fp(stdout, result) == 1) handle_errors();
     printf("\n\n");
 
     BN_free(bn1);

@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     //Computing final signature
     if(!EVP_DigestFinal(ctx, md, &md_len)) handle_errors();
 
-    printf("(%s || %s) digest:\n", argv[1], argv[2]);
+    printf("(%s || %s) digest (len: %d):\n", argv[1], argv[2], md_len);
     for(int i = 0; i < md_len; i++) {
         printf("%2x", md[i]);
     }

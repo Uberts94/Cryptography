@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     if(RAND_load_file("/dev/random", 32) != 32) handle_errors();
 
     unsigned char key[SIZE], iv[SIZE], *ciphertext;
-    int lenght=0, update;
+    int lenght=0, update, final;
 
     //Keygen
     if(!RAND_priv_bytes(key, SIZE)) handle_errors();
@@ -56,60 +56,75 @@ int main(int argc, char **argv) {
     if(!EVP_CIPHER_CTX_set_padding(ctx, 0)) handle_errors();
 
     //Checking the input len
-    int input_len = strlen(argv[1]);
+    int input_len = strlen(argv[1]), padding_lenght = SIZE-input_len%SIZE;
     if(input_len%SIZE != 0) {
-        printf("We need padding, because the input size ins't an integer multiple of the cipher block size (AES_128 bit)\n");
+        printf("The input size (%d bytes) isn't a multiple integer of the cipher block size (16 bytes for AES_128 bit).\n");
         unsigned char *padding, *padding_hex;
-        padding = malloc(input_len%16 * sizeof(unsigned char));
-        padding_hex = malloc(input_len%16*2 * sizeof(unsigned char));
-        ciphertext = malloc(input_len * sizeof(unsigned char));
-        if(!RAND_bytes(padding, 16-input_len%16)) handle_errors();
-        for(int i = 0; i < 16-input_len%16; i++) {
-            sscanf(&padding[i], "%2x", &padding_hex[i*2]);
-            printf("%c", padding[i*2]);
+
+        //Dynamic memory allocation
+        padding = malloc(padding_lenght * sizeof(unsigned char));
+        padding_hex = malloc(padding_lenght * sizeof(unsigned char));
+        ciphertext = malloc(input_len+padding_lenght * sizeof(unsigned char));
+
+        //Generating random padding bytes. In this example, we generate padding_lenght/2 of bytes, 
+        //because each byte is converted in a 2 digit hexadecimal byte (before the concatenation with the input)
+        if(!RAND_bytes(padding, padding_lenght/2)) handle_errors();
+        for(int i = 0; i < padding_lenght/2; i++) {
+            //Converting each byte in a 2 digit hexadecimal byte
+            sprintf(&padding_hex[i*2], "%02x", padding[i]);
         }
+        printf("Generating padding ... ");
+        for(int i = 0; i < padding_lenght; i++) printf("%c", padding_hex[i]);
+        printf("\n");
+
+        //Concatenating padding to input string
+        strcpy(ciphertext, argv[1]);
         ciphertext = strcat(argv[1], padding_hex);
-        printf("New input: '%s'\n", ciphertext);
-        printf("New input size: %d\n", strlen(strcat(argv[1], padding)));
+        printf("New input with padding: '%s'\n", ciphertext);
+        printf("The new size (%d bytes) is a multiple integer of the cipher block size for AES_128 bit.\n", strlen(ciphertext));
+
+        //Dynamic memory realease
         free(padding);
         free(padding_hex);
     }
 
+    printf("Now we can encrypt the input....\n");
     //Encryption
     if(!EVP_EncryptUpdate(ctx, ciphertext, &update, argv[1], strlen(argv[1]))) handle_errors();
     lenght+=update;
 
-    if(!EVP_EncryptFinal(ctx, ciphertext+lenght, &lenght)) handle_errors();
+    //Encryption of the last block
+    if(!EVP_EncryptFinal(ctx, ciphertext+lenght, &final)) handle_errors();
+    lenght+=final;
 
     printf("Ciphertext:\n");
     for(int i = 0; i < lenght; i++) {
-        printf("%2x", ciphertext[i]);
+        printf("%02x", ciphertext[i]);
     }
     printf("\n");
-/*
-    //Last block encryption
-    if(!EVP_EncryptFinal(ctx, ciphertext, &update)) {
-        printf("Padding needed!");
-        int input_len = strlen(argv[1]);
-        printf("Input string len: %d\n", input_len);
-        printf("AES128 bit need %d padding bytes for the last block....", input_len%16);
-        printf("Generated padding: ");
-        unsigned char *padding;
-        padding = malloc(input_len%16 * sizeof(unsigned char));
-        if(!RAND_bytes(padding, 10)) handle_errors();
-        printf("%s\n", padding);
-        ciphertext = strcat(ciphertext+(input_len/16))
-        if(!EVP_EncryptFinal_ex(ctx, last_block+lenght, &lenght)) handle_errors();
-        free(padding);
-    } else {
-        lenght+=update;
-        for(int i = 0; i < lenght; i++) {
-            printf("%2x", ciphertext[i]);
-        }
-    }
-*/
 
     EVP_CIPHER_CTX_free(ctx);
+
+    /* TO CHECK THE CORRECTNESS, UNCOMMENT THE CODE BELOW TO DECRYPT THE CIPHERTEXT FILE*/
+
+    EVP_CIPHER_CTX *ctx1 = EVP_CIPHER_CTX_new();
+    EVP_DecryptInit(ctx1, EVP_aes_128_cbc(), key, iv);
+    EVP_CIPHER_CTX_set_padding(ctx1, 0);
+
+    int decrypted_len = 0;
+    unsigned char decrypted[MAXSIZE];
+
+    EVP_DecryptUpdate(ctx, decrypted, &update, ciphertext, strlen(ciphertext));
+    decrypted_len+=update;
+
+    EVP_DecryptFinal(ctx, decrypted, &final);
+    decrypted_len+=final;
+
+    printf("Plaintext:\n");
+    for(int i = 0; i < decrypted_len-padding_lenght; i++){
+        printf("%c", decrypted[i]);
+    }
+    printf("\n");
 
     // completely free all the cipher data
     CRYPTO_cleanup_all_ex_data();

@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
     //Loading all the algorithms
     OpenSSL_add_all_algorithms();
 
+    //Checking params
     if(argc != 2) {
         fprintf(stderr, "Missing params. %s need the input 'filename'\n", argv[0]);
         abort();
@@ -28,6 +29,7 @@ int main(int argc, char **argv) {
     int nbytes_read, md_len;
     unsigned char buffer[MAXSIZE], md[EVP_MD_size(EVP_sha256())];
 
+    //Checking file
     if(input == NULL) {
         fprintf(stderr,"Error opening %s file.\n", argv[1]);
         abort();
@@ -38,10 +40,16 @@ int main(int argc, char **argv) {
 
     EVP_DigestInit(md_ctx, EVP_sha256());
 
+    //Reading file and computing incremental digest
     while(nbytes_read = fread(buffer, sizeof(unsigned char), MAXSIZE, input) > 0) {
+        if(ferror(input)) {
+            fprintf(stderr, "Error reading %s file.\n", argv[0]);
+            abort();
+        }
         if(!EVP_DigestUpdate(md_ctx, buffer, nbytes_read)) handle_errors();
     }
 
+    //Computing final digest
     if(!EVP_DigestFinal(md_ctx, md, &md_len)) handle_errors();
 
     printf("Digest:\n");
@@ -49,8 +57,10 @@ int main(int argc, char **argv) {
         printf("%2x", md[i]);
     }
 
+    //Free context
     EVP_MD_CTX_free(md_ctx);
 
+    //Closing file
     fclose(input);
 
 

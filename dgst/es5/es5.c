@@ -25,6 +25,8 @@ int main(int argc, char **argv) {
         abort();
     }
 
+    printf("Key:\n%s\n", argv[2]);
+        
     FILE *input = fopen(argv[1], "rb");
 
     //Checking input file

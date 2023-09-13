@@ -2,6 +2,7 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/hmac.h>
+#include <openssl/crypto.h>
 #include <string.h>
 
 #define ENCRYPT 1
@@ -65,18 +66,18 @@ int main(int argc, char **argv) {
     }
     printf("\n");
     
-    printf("Received HMAC:\n %s\n", argv[1]);
+    printf("Received HMAC:\n%s\n", argv[1]);
 
     unsigned char hmac_binary[strlen(argv[1])/2];
-    for(int i = 0; i < strlen(argv[2])/2;i++){
+    for(int i = 0; i < strlen(argv[1])/2;i++){
         sscanf(&argv[1][2*i],"%2hhx", &hmac_binary[i]);
     }
 
     // if( CRYPTO_memcmp(hmac_binary, hmac_value, hmac_len) == 0 )
-    if( (hmac_len == (strlen(argv[1])/2)) && (CRYPTO_memcmp(hmac_binary, hmac_value, hmac_len) == 0))
+    if( (hmac_len == (strlen(argv[1])/2)) && (CRYPTO_memcmp(hmac_value, hmac_binary, hmac_len) == 0) )
         printf("Verification successful\n");
     else
-        printf("Verification failed\n");
+        printf("CRYPTO_memcpm returns %d. Verification failed\n", CRYPTO_memcmp(hmac_value, hmac_binary, hmac_len/2));
 
 
     //Free contexts

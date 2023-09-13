@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     fclose(f_pubkey);
 
     //opening signature file
-    FILE *fsig_in = fopen(argv[1], "r");
+    FILE *fsig_in = fopen(argv[1], "rb");
     if(fsig_in == NULL) {
         fprintf(stderr, "Error opening the signature file.\n");
         abort();

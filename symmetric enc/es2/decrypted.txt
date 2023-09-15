@@ -1,4 +1,0 @@
-Hi, I'm :ietro and the content of this file will be encrypted by means 
-AES 128 bit in Cipher Block Chain mode. This file should contain at least 1024
-bytes, otherwise the fread will read random (MAX_BUFFER - content_file_bytes) bytes 
-from the memory. Try to reduce the size of the file content, and youנננננננננ

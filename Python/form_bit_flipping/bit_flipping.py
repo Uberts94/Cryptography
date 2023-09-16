@@ -9,10 +9,16 @@ from Crypto.Cipher import Salsa20
 # So, if he knows the encrypted data, by means of the bit flipping attack can force a new 
 # value for the data.
 
-fin = open("ciphertext.enc", "rb")
+# Reading the encrypted file
+input = b''
+with open("ciphertext.enc", "rb") as fin:
+    read = fin.read(1024)
+    while read:
+        input += read
+        read = fin.read(1024)
 
 #The whole data string is 10 bytes long
-ciphertext = bytearray(fin.read(10));
+ciphertext = bytearray(input);
 
 new_tens = b'1'
 new_tens_ascii = ord(new_tens)
@@ -31,13 +37,27 @@ mask2 = ord('9')^new_units_ascii
 
 edt_ciphertext[4] = ciphertext[4]^mask2
 
+fin.close()
+
+# Writing the edited ciphertext in the encrypted file
+
+with open("ciphertext.enc", "wb") as fout:
+    fout.write(edt_ciphertext)
+
+fout.close()
+
 ###########################################################################################
 
 # Attacker sends to the victim the modified ciphertext. The victim decrypts the ciphertext
 
 cipher = Salsa20.new(KEY, NONCE)
+fout = open("victim.dec", "wb")
 
-plaintext = cipher.decrypt(edt_ciphertext)
+with open("ciphertext.enc", "rb") as fin:
+    ciphertext = fin.read(1024)
+    while ciphertext:
+        decrypted = cipher.decrypt(ciphertext)
+        fout.write(decrypted)
+        ciphertext = fin.read(1024)
 
-print(plaintext)
-
+print("File successfully decrypted.\n")

@@ -1,0 +1,1 @@
+string_hmac = b'this is the message. compute hmac-sha384'

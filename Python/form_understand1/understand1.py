@@ -73,4 +73,4 @@ if __name__ == '__main__':
     decrypted_msg = iroot(3, c)
     print("Decrypting... \n"+decrypted_msg.to_bytes(decrypted_msg.bit_length() // 8+1, byteorder='big').decode())
     print("As espected, the program returns exactly the same message decrypted from the input ciphertext, even if")
-    print("it has been encrypted with a randomly generated new RSA key.\n")
+    print("it has been encrypted with a randomly generated new RSA key.")
